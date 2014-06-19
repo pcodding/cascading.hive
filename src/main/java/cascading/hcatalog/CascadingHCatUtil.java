@@ -14,8 +14,14 @@
 
 package cascading.hcatalog;
 
-import cascading.cascade.CascadeException;
-import com.google.common.base.Preconditions;
+import static com.google.common.collect.Lists.newArrayList;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -35,14 +41,9 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import cascading.cascade.CascadeException;
 
-import static com.google.common.collect.Lists.newArrayList;
+import com.google.common.base.Preconditions;
 
 /**
  * 
@@ -157,7 +158,7 @@ public class CascadingHCatUtil {
 			client = getHiveMetaStoreClient(jobConf);
 			
 			Table hiveTable = HCatUtil.getTable(client, db, table);
-			hiveTable.setDataLocation(new URI(path));
+			hiveTable.setDataLocation(new Path(path));
 			
 			client.alter_table(db, table, hiveTable.getTTable());
 		} catch (IOException e) {
@@ -168,8 +169,6 @@ public class CascadingHCatUtil {
 			logError("Table doesn't exist in HCatalog: " + table, e);
 		} catch (TException e) {
 			logError("Error occured when getting Table", e);
-		} catch (URISyntaxException e) {
-			logError("Error occured when getting uri from path:" + path, e);
 		} finally {
 			HCatUtil.closeHiveClientQuietly(client);
 		}
